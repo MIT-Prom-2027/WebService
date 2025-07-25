@@ -1,0 +1,33 @@
+données reçu : 
+  ~ num bacc
+  ~ année bacc
+
+données attestations : 
+  - nom et prénom
+  - date de naissance
+  - mention
+  - année bacc
+
+donées relever de notes : 
+  - type de bacc
+  - année du bacc
+  - nom et prénom 
+  - date de naissance
+  - lieu de naissance
+  - centre du bacc
+  - numéro bacc
+  - serie du bacc
+  - options bacc
+  - notes bacc
+  - total notes et coefficient
+  - moyenne bacc
+  - est admis ?
+  - mention
+
+préinscription
+  - est admis ?
+  - infos perso
+  - infos bacc
+  
+
+  
