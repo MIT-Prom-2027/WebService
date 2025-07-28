@@ -40,45 +40,45 @@ namespace UnivManager.Context
                 entity.HasIndex(e => e.username, "administration_username_key").IsUnique(); // Username unique
             });
 
-            // Configuration de l'entité bachelier et de ses relations
-            modelBuilder.Entity<bachelier>(entity =>
-            {
-                entity.HasKey(e => e.id_bachelier).HasName("pk_bacheliers");
-                entity.Property(e => e.id_bachelier).HasDefaultValueSql("nextval('bacheliers_id_bachelier_seq1'::regclass)");
-                // Relations avec centre, établissement, mention, option, personne
-                entity.HasOne(d => d.id_centreNavigation).WithMany(p => p.bacheliers)
-                    .HasForeignKey(d => d.id_centre)
-                    .HasConstraintName("bacheliers_centre_fkey");
-                entity.HasOne(d => d.id_etablissementNavigation).WithMany(p => p.bacheliers)
-                    .HasForeignKey(d => d.id_etablissement)
-                    .HasConstraintName("bacheliers_etablissement_fkey");
-                entity.HasOne(d => d.id_mentionNavigation).WithMany(p => p.bacheliers)
-                    .HasForeignKey(d => d.id_mention)
-                    .HasConstraintName("bacheliers_mention_fkey");
-                entity.HasOne(d => d.id_optionNavigation).WithMany(p => p.bacheliers)
-                    .HasForeignKey(d => d.id_option)
-                    .HasConstraintName("bacheliers_serie_fkey");
-                entity.HasOne(d => d.id_personneNavigation).WithMany(p => p.bacheliers)
-                    .HasForeignKey(d => d.id_personne)
-                    .HasConstraintName("bacheliers_id_personne_fkey");
-            });
+        // Configuration de l'entité bachelier et de ses relations
+        modelBuilder.Entity<bachelier>(entity =>
+        {
+            entity.HasKey(e => e.id_bachelier).HasName("pk_bacheliers");
+            entity.Property(e => e.id_bachelier).HasDefaultValueSql("nextval('bacheliers_id_bachelier_seq'::regclass)");
+            // Relations avec centre, établissement, mention, option, personne
+            entity.HasOne(d => d.id_centreNavigation).WithMany(p => p.bacheliers)
+                .HasForeignKey(d => d.id_centre)
+                .HasConstraintName("bacheliers_centre_fkey");
+            entity.HasOne(d => d.id_etablissementNavigation).WithMany(p => p.bacheliers)
+                .HasForeignKey(d => d.id_etablissement)
+                .HasConstraintName("bacheliers_etablissement_fkey");
+            entity.HasOne(d => d.id_mentionNavigation).WithMany(p => p.bacheliers)
+                .HasForeignKey(d => d.id_mention)
+                .HasConstraintName("bacheliers_mention_fkey");
+            entity.HasOne(d => d.id_optionNavigation).WithMany(p => p.bacheliers)
+                .HasForeignKey(d => d.id_option)
+                .HasConstraintName("bacheliers_serie_fkey");
+            entity.HasOne(d => d.id_personneNavigation).WithMany(p => p.bacheliers)
+                .HasForeignKey(d => d.id_personne)
+                .HasConstraintName("bacheliers_id_personne_fkey");
+        });
 
-            // Configuration de l'entité centre et de sa relation avec province
-            modelBuilder.Entity<centre>(entity =>
-            {
-                entity.HasKey(e => e.id_centre).HasName("centres_pkey");
-                entity.Property(e => e.id_centre).HasDefaultValueSql("nextval('centres_id_centre_seq1'::regclass)");
-                entity.HasOne(d => d.id_provinceNavigation).WithMany(p => p.centres)
-                    .HasForeignKey(d => d.id_province)
-                    .HasConstraintName("fk_centres_provinces");
-            });
+        // Configuration de l'entité centre et de sa relation avec province
+        modelBuilder.Entity<centre>(entity =>
+        {
+            entity.HasKey(e => e.id_centre).HasName("centres_pkey");
+            entity.Property(e => e.id_centre).HasDefaultValueSql("nextval('centres_id_centre_seq'::regclass)");
+            entity.HasOne(d => d.id_provinceNavigation).WithMany(p => p.centres)
+                .HasForeignKey(d => d.id_province)
+                .HasConstraintName("fk_centres_provinces");
+        });
 
-            // Configuration de l'entité etablissement
-            modelBuilder.Entity<etablissement>(entity =>
-            {
-                entity.HasKey(e => e.id_etablissement).HasName("etablissements_pkey");
-                entity.Property(e => e.id_etablissement).HasDefaultValueSql("nextval('etablissements_id_etablissement_seq1'::regclass)");
-            });
+        // Configuration de l'entité etablissement
+        modelBuilder.Entity<etablissement>(entity =>
+        {
+            entity.HasKey(e => e.id_etablissement).HasName("etablissements_pkey");
+            entity.Property(e => e.id_etablissement).HasDefaultValueSql("nextval('etablissements_id_etablissement_seq'::regclass)");
+        });
 
             // Configuration de l'entité historique et de ses relations
             modelBuilder.Entity<historique>(entity =>
@@ -98,35 +98,35 @@ namespace UnivManager.Context
                     .HasConstraintName("fk_historique_provinces");
             });
 
-            // Configuration de l'entité matiere
-            modelBuilder.Entity<matiere>(entity =>
-            {
-                entity.HasKey(e => e.id_matiere).HasName("matieres_pkey");
-                entity.Property(e => e.id_matiere).HasDefaultValueSql("nextval('matieres_id_matiere_seq1'::regclass)");
-            });
+        // Configuration de l'entité matiere
+        modelBuilder.Entity<matiere>(entity =>
+        {
+            entity.HasKey(e => e.id_matiere).HasName("matieres_pkey");
+            entity.Property(e => e.id_matiere).HasDefaultValueSql("nextval('matieres_id_matiere_seq'::regclass)");
+        });
 
-            // Configuration de l'entité mention
-            modelBuilder.Entity<mention>(entity =>
-            {
-                entity.HasKey(e => e.id_mention).HasName("mentions_pkey");
-                entity.Property(e => e.id_mention).HasDefaultValueSql("nextval('mentions_id_mention_seq1'::regclass)");
-                entity.Property(e => e.max).HasDefaultValue(20); // Valeur max par défaut
-                entity.Property(e => e.min).HasDefaultValue(0);  // Valeur min par défaut
-            });
+        // Configuration de l'entité mention
+        modelBuilder.Entity<mention>(entity =>
+        {
+            entity.HasKey(e => e.id_mention).HasName("mentions_pkey");
+            entity.Property(e => e.id_mention).HasDefaultValueSql("nextval('mentions_id_mention_seq'::regclass)");
+            entity.Property(e => e.max).HasDefaultValue(20); // Valeur max par défaut
+            entity.Property(e => e.min).HasDefaultValue(0);  // Valeur min par défaut
+        });
 
-            // Configuration de l'entité note et de ses relations
-            modelBuilder.Entity<note>(entity =>
-            {
-                entity.HasKey(e => e.id_note).HasName("notes_pkey");
-                entity.Property(e => e.id_note).HasDefaultValueSql("nextval('notes_id_note_seq1'::regclass)");
-                entity.Property(e => e.est_optionnel).HasDefaultValue(false); // Par défaut, la note n'est pas optionnelle
-                entity.HasOne(d => d.id_bachelierNavigation).WithMany(p => p.notes)
-                    .HasForeignKey(d => d.id_bachelier)
-                    .HasConstraintName("notes_id_bachelier_fkey");
-                entity.HasOne(d => d.id_matiereNavigation).WithMany(p => p.notes)
-                    .HasForeignKey(d => d.id_matiere)
-                    .HasConstraintName("notes_id_matiere_fkey");
-            });
+        // Configuration de l'entité note et de ses relations
+        modelBuilder.Entity<note>(entity =>
+        {
+            entity.HasKey(e => e.id_note).HasName("notes_pkey");
+            entity.Property(e => e.id_note).HasDefaultValueSql("nextval('notes_id_note_seq'::regclass)");
+            entity.Property(e => e.est_optionnel).HasDefaultValue(false); // Par défaut, la note n'est pas optionnelle
+            entity.HasOne(d => d.id_bachelierNavigation).WithMany(p => p.notes)
+                .HasForeignKey(d => d.id_bachelier)
+                .HasConstraintName("notes_id_bachelier_fkey");
+            entity.HasOne(d => d.id_matiereNavigation).WithMany(p => p.notes)
+                .HasForeignKey(d => d.id_matiere)
+                .HasConstraintName("notes_id_matiere_fkey");
+        });
 
             // Configuration de l'entité option
             modelBuilder.Entity<option>(entity =>
@@ -135,19 +135,19 @@ namespace UnivManager.Context
                 entity.Property(e => e.id_option).HasDefaultValueSql("nextval('options_id_optioin_seq'::regclass)");
             });
 
-            // Configuration de l'entité personne
-            modelBuilder.Entity<personne>(entity =>
-            {
-                entity.HasKey(e => e.id_personne).HasName("personnes_pkey");
-                entity.Property(e => e.id_personne).HasDefaultValueSql("nextval('personnes_id_personne_seq1'::regclass)");
-            });
+        // Configuration de l'entité personne
+        modelBuilder.Entity<personne>(entity =>
+        {
+            entity.HasKey(e => e.id_personne).HasName("personnes_pkey");
+            entity.Property(e => e.id_personne).HasDefaultValueSql("nextval('personnes_id_personne_seq'::regclass)");
+        });
 
-            // Configuration de l'entité province
-            modelBuilder.Entity<province>(entity =>
-            {
-                entity.HasKey(e => e.id_province).HasName("provinces_pkey");
-                entity.Property(e => e.id_province).HasDefaultValueSql("nextval('provinces_id_province_seq1'::regclass)");
-            });
+        // Configuration de l'entité province
+        modelBuilder.Entity<province>(entity =>
+        {
+            entity.HasKey(e => e.id_province).HasName("provinces_pkey");
+            entity.Property(e => e.id_province).HasDefaultValueSql("nextval('provinces_id_province_seq'::regclass)");
+        });
 
             // Déclaration des séquences utilisées pour les clés primaires
             modelBuilder.HasSequence<int>("administration_id_seq");

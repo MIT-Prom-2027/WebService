@@ -13,13 +13,13 @@
 //             return StatusCode(201, resultat);
 //         }
 
-//         [HttpPost]
-//         public IActionResult PostTest()
-//         {
-//             [FromBody] dynamic data
-//             {
-//                 return Ok(new { message = "JSON reçu", contenu = data });
-//             }
-//         }
-//     }
-// }
+        // [HttpPost]
+        // public IActionResult PostTest()
+        // {
+        //     [FromBody] dynamic data;
+        //     {
+        //         return Ok(new { message = "JSON reçu", contenu = data });
+        //     }
+        // }
+    }
+}
