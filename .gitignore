@@ -26,3 +26,4 @@ TestResults/
 node_modules/
 packages/
 # Ajoutez ici tout autre dossier ou fichier généré automatiquement ou contenant des informations sensibles
+.fake
