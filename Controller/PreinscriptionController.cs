@@ -30,7 +30,7 @@ namespace UnivManager.Controllers
                 Nom_prenom = personnes[0].nom_prenom,
                 Date_naissance = personnes[0].date_naissance.ToDateTime(new TimeOnly(0, 0)),
                 Lieu_naissance = personnes[0].lieu_naissance,
-                Sexe = "M",
+                // Sexe = "M",
                 Mention = _context.mentions.Where(m => m.id_mention == bachelier[0].id_mention).Select(m => m.nom_mention).FirstOrDefault(),
                 Option = _context.options.Where(o => o.id_option == bachelier[0].id_option).Select(o => o.serie).FirstOrDefault(),
                 Num_bacc = data.Num_bacc.ToString()
