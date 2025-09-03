@@ -15,20 +15,9 @@ namespace UnivManager.Controllers
         {
             _context = context;
         }
-        [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
-        {
-            return "value";
-        }
 
         [HttpPost]
-        public IActionResult Post([FromBody] AttestationRequest request)
+        public ActionResult<AttestationResponse> Post([FromBody] AttestationRequest request)
         {
             if (request == null || string.IsNullOrEmpty(request.NumeroBacc) || string.IsNullOrEmpty(request.Annee))
             {
@@ -63,16 +52,6 @@ namespace UnivManager.Controllers
 
             return Ok(response);
         }
-
-
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
+
