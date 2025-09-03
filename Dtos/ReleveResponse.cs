@@ -6,31 +6,31 @@ namespace UnivManager.Dtos
     public class ReleveResponse
     {
         // Informations personnelles
-        public string NomPrenom { get; set; } = null!;
-        public DateOnly DateNaissance { get; set; }
-        public string LieuNaissance { get; set; } = null!;
+        public string? Nom_prenom { get; set; }
+        public DateTime Date_naissance { get; set; }
+        public string? Lieu_naissance { get; set; }
         
         // Informations du baccalauréat
-        public DateOnly AnneeBacc { get; set; }
-        public string NumeroBacc { get; set; } = null!;
-        public string SerieBacc { get; set; } = null!;
-        public string CentreBacc { get; set; } = null!;
+        public int Annee { get; set; }
+        public string? Num_bacc { get; set; }
+        public string? Serie_bacc { get; set; }
+        public string? Centre_bacc { get; set; }
         
         // Notes et résultats
         public List<NoteDetail> Notes { get; set; } = new List<NoteDetail>();
-        public double TotalNotes { get; set; }
-        public double TotalCoefficients { get; set; }
-        public double MoyenneBacc { get; set; }
-        public bool EstAdmis { get; set; }
-        public string Mention { get; set; } = null!;
+        public double Total_notes { get; set; }
+        public double Total_coefficients { get; set; }
+        public double Moyenne_bacc { get; set; }
+        public bool Est_admis { get; set; }
+        public string? Mention { get; set; }
     }
 
     public class NoteDetail
     {
-        public string Matiere { get; set; } = null!;
+        public string? Matiere { get; set; }
         public double Note { get; set; }
         public double Coefficient { get; set; }
-        public bool EstOptionnel { get; set; }
-        public double NotePondere { get; set; }
+        public bool Est_optionnel { get; set; }
+        public double Note_ponderee { get; set; }
     }
 }

@@ -1,161 +1,86 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UnivManager.Context;
 using UnivManager.Dtos;
-using UnivManager.Models;
+using UnivManager.Context;
 
-namespace UnivManager.Controller
+namespace UnivManager.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ReleveController : ControllerBase
     {
-        private readonly AppDbContext _context;
-
+        public readonly AppDbContext _context;
         public ReleveController(AppDbContext context)
         {
             _context = context;
         }
 
-        /// <summary>
-        /// Récupère le relevé de notes d'un bachelier par son numéro de candidat
-        /// </summary>
-        /// <param name="numeroCandidat">Numéro de candidat du bachelier</param>
-        /// <returns>Relevé de notes complet</returns>
-        [HttpGet("par-numero/{numeroCandidat}")]
-        public async Task<ActionResult<ReleveResponse>> GetReleveParNumero(string numeroCandidat)
+        [HttpPost("getDataByNumBacc")]
+        public ActionResult<ReleveResponse> Post([FromBody] ReleveRequest data)
         {
-            var bachelier = await _context.bacheliers
-                .Include(b => b.id_personneNavigation)
-                .Include(b => b.id_centreNavigation)
-                .Include(b => b.id_optionNavigation)
-                .Include(b => b.id_mentionNavigation)
-                .Include(b => b.notes)
-                    .ThenInclude(n => n.id_matiereNavigation)
-                .FirstOrDefaultAsync(b => b.numero_candidat == numeroCandidat);
-
-            if (bachelier == null)
+            if (data == null || data.Num_bacc == 0 || data.Annee == 0)
             {
-                return NotFound($"Aucun bachelier trouvé avec le numéro de candidat : {numeroCandidat}");
+                return BadRequest("Données de requête invalides.");
             }
 
-            var releve = await ConstruireReleve(bachelier);
-            return Ok(releve);
-        }
-
-        /// <summary>
-        /// Récupère le relevé de notes d'un bachelier par son ID
-        /// </summary>
-        /// <param name="id">ID du bachelier</param>
-        /// <returns>Relevé de notes complet</returns>
-        [HttpGet("par-id/{id}")]
-        public async Task<ActionResult<ReleveResponse>> GetReleveParId(int id)
-        {
-            var bachelier = await _context.bacheliers
-                .Include(b => b.id_personneNavigation)
-                .Include(b => b.id_centreNavigation)
-                .Include(b => b.id_optionNavigation)
-                .Include(b => b.id_mentionNavigation)
-                .Include(b => b.notes)
-                    .ThenInclude(n => n.id_matiereNavigation)
-                .FirstOrDefaultAsync(b => b.id_bachelier == id);
-
-            if (bachelier == null)
+            var bachelier = _context.bacheliers.Where(b => b.numero_candidat == data.Num_bacc.ToString()).ToList();
+            if (bachelier == null || bachelier.Count == 0)
             {
-                return NotFound($"Aucun bachelier trouvé avec l'ID : {id}");
+                return NotFound("Bachelier not found");
+            }
+            var personnes = _context.personnes.Where(p => p.id_personne == bachelier[0].id_personne).ToList();
+            if (personnes == null || personnes.Count == 0)
+            {
+                return NotFound("Person not found");
             }
 
-            var releve = await ConstruireReleve(bachelier);
-            return Ok(releve);
-        }
-
-        /// <summary>
-        /// Récupère tous les relevés de notes pour une année donnée
-        /// </summary>
-        /// <param name="annee">Année du baccalauréat</param>
-        /// <returns>Liste des relevés de notes</returns>
-        [HttpGet("par-annee/{annee}")]
-        public async Task<ActionResult<List<ReleveResponse>>> GetRelevesParAnnee(DateOnly annee)
-        {
-            var bacheliers = await _context.bacheliers
-                .Include(b => b.id_personneNavigation)
-                .Include(b => b.id_centreNavigation)
-                .Include(b => b.id_optionNavigation)
-                .Include(b => b.id_mentionNavigation)
-                .Include(b => b.notes)
-                    .ThenInclude(n => n.id_matiereNavigation)
-                .Where(b => b.annee == annee)
-                .ToListAsync();
-
-            if (!bacheliers.Any())
-            {
-                return NotFound($"Aucun bachelier trouvé pour l'année : {annee}");
-            }
-
-            var releves = new List<ReleveResponse>();
-            foreach (var bachelier in bacheliers)
-            {
-                var releve = await ConstruireReleve(bachelier);
-                releves.Add(releve);
-            }
-
-            return Ok(releves);
-        }
-
-        /// <summary>
-        /// Construit un objet ReleveResponse à partir d'un bachelier
-        /// </summary>
-        private async Task<ReleveResponse> ConstruireReleve(bachelier bachelier)
-        {
-            var releve = new ReleveResponse
-            {
-                NomPrenom = bachelier.id_personneNavigation?.nom_prenom ?? "Non renseigné",
-                DateNaissance = bachelier.id_personneNavigation?.date_naissance ?? DateOnly.MinValue,
-                LieuNaissance = bachelier.id_personneNavigation?.lieu_naissance ?? "Non renseigné",
-                AnneeBacc = bachelier.annee,
-                NumeroBacc = bachelier.numero_candidat,
-                SerieBacc = bachelier.id_optionNavigation?.serie ?? "Non renseigné",
-                CentreBacc = bachelier.id_centreNavigation?.nom_centre ?? "Non renseigné",
-                MoyenneBacc = bachelier.moyenne,
-                Mention = bachelier.id_mentionNavigation?.nom_mention ?? "Non renseigné"
-            };
-
-            // Calcul des notes et coefficients
+            // Récupération des notes
+            var notes = _context.notes.Where(n => n.id_bachelier == bachelier[0].id_bachelier).ToList();
+            var noteDetails = new List<NoteDetail>();
             double totalNotes = 0;
             double totalCoefficients = 0;
 
-            foreach (var note in bachelier.notes)
+            foreach (var note in notes)
             {
-                // Coefficient par défaut de 1 si non spécifié
-                double coefficient = 1.0; // Vous pouvez ajouter un champ coefficient dans le modèle note si nécessaire
+                var matiere = _context.matieres.Where(m => m.id_matiere == note.id_matiere).FirstOrDefault();
+                double coefficient = 1.0; // Coefficient par défaut
                 
                 var noteDetail = new NoteDetail
                 {
-                    Matiere = note.id_matiereNavigation?.nom_matiere ?? "Matière inconnue",
+                    Matiere = matiere?.nom_matiere,
                     Note = note.valeur_note,
                     Coefficient = coefficient,
-                    EstOptionnel = note.est_optionnel ?? false,
-                    NotePondere = note.valeur_note * coefficient
+                    Est_optionnel = note.est_optionnel ?? false,
+                    Note_ponderee = note.valeur_note * coefficient
                 };
 
-                releve.Notes.Add(noteDetail);
-                totalNotes += noteDetail.NotePondere;
+                noteDetails.Add(noteDetail);
+                totalNotes += noteDetail.Note_ponderee;
                 totalCoefficients += coefficient;
             }
 
-            releve.TotalNotes = totalNotes;
-            releve.TotalCoefficients = totalCoefficients;
-            
-            // Recalcul de la moyenne si nécessaire
-            if (totalCoefficients > 0)
+            // Récupération des informations supplémentaires
+            var centre = _context.centres.Where(c => c.id_centre == bachelier[0].id_centre).FirstOrDefault();
+            var option = _context.options.Where(o => o.id_option == bachelier[0].id_option).FirstOrDefault();
+            var mention = _context.mentions.Where(m => m.id_mention == bachelier[0].id_mention).FirstOrDefault();
+
+            double moyenne = totalCoefficients > 0 ? totalNotes / totalCoefficients : 0;
+
+            return Ok(new ReleveResponse
             {
-                releve.MoyenneBacc = totalNotes / totalCoefficients;
-            }
-
-            // Détermination de l'admission (moyenne >= 10)
-            releve.EstAdmis = releve.MoyenneBacc >= 10.0;
-
-            return releve;
+                Nom_prenom = personnes[0].nom_prenom,
+                Date_naissance = personnes[0].date_naissance.ToDateTime(new TimeOnly(0, 0)),
+                Lieu_naissance = personnes[0].lieu_naissance,
+                Annee = bachelier[0].annee.Year,
+                Num_bacc = data.Num_bacc.ToString(),
+                Serie_bacc = option?.serie,
+                Centre_bacc = centre?.nom_centre,
+                Notes = noteDetails,
+                Total_notes = totalNotes,
+                Total_coefficients = totalCoefficients,
+                Moyenne_bacc = moyenne,
+                Est_admis = moyenne >= 10.0,
+                Mention = mention?.nom_mention
+            });
         }
     }
 }
