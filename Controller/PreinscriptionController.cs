@@ -15,24 +15,25 @@ namespace UnivManager.Controllers
         [HttpPost("getDataByNumBacc")]
         public ActionResult<PreinscriptionResponse> Post([FromBody] PreinscriptionRequest data)
         {
-            var bachelier = _context.bacheliers.Where(b => b.numero_candidat == data.Num_bacc.ToString()).ToList();
+            var bachelier = _context.Bacheliers.Where(b => b.NumeroCandidat == data.Num_bacc.ToString()).ToList();
             if (bachelier == null || bachelier.Count == 0)
             {
                 return NotFound("Bachelier not found");
             }
-            var personnes = _context.personnes.Where(p => p.id_personne == bachelier[0].id_personne).ToList();
+            var personnes = _context.Personnes.Where(p => p.IdPersonne == bachelier[0].IdPersonne).ToList();
             if (personnes == null || personnes.Count == 0)
             {
                 return NotFound("Person not found");
             }
             return Ok(new PreinscriptionResponse
             {
-                Nom_prenom = personnes[0].nom_prenom,
-                Date_naissance = personnes[0].date_naissance.ToDateTime(new TimeOnly(0, 0)),
-                Lieu_naissance = personnes[0].lieu_naissance,
+                Nom_prenom = personnes[0].NomPrenom,
+                Date_naissance = personnes[0].DateNaissance.ToDateTime(new TimeOnly(0, 0)),
+                Lieu_naissance = personnes[0].LieuNaissance,
+                Sexe = personnes[0].Sexe,
                 // Sexe = "M",
-                Mention = _context.mentions.Where(m => m.id_mention == bachelier[0].id_mention).Select(m => m.nom_mention).FirstOrDefault(),
-                Option = _context.options.Where(o => o.id_option == bachelier[0].id_option).Select(o => o.serie).FirstOrDefault(),
+                Mention = _context.Mentions.Where(m => m.IdMention == bachelier[0].IdMention).Select(m => m.NomMention).FirstOrDefault(),
+                Option = _context.Options.Where(o => o.IdOption == bachelier[0].IdOption).Select(o => o.Serie).FirstOrDefault(),
                 Num_bacc = data.Num_bacc.ToString()
             });
         }
