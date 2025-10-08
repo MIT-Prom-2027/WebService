@@ -17,7 +17,7 @@ namespace UnivManager.Controllers
         [HttpPost("getDataByNumBacc")]
         public ActionResult<ReleveResponse> Post([FromBody] ReleveRequest data)
         {
-            if (data == null || data.Num_bacc == 0 || data.Annee == 0)
+            if (data == null || data.Num_bacc == 0 || data.Annee_bacc == 0)
             {
                 return BadRequest("Données de requête invalides.");
             }
