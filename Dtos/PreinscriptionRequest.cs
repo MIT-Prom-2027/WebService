@@ -2,7 +2,7 @@ namespace UnivManager.Dtos
 {
     public class PreinscriptionRequest
     {
-        public int num_bacc { get; set; }
-        public int annee_bacc { get; set; }
+        public int Num_bacc { get; set; }
+        public int Annee_bacc { get; set; }
     }
 }
