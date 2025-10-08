@@ -15,7 +15,7 @@ namespace UnivManager.Controllers
         [HttpPost("getDataByNumBacc")]
         public ActionResult<PreinscriptionResponse> Post([FromBody] PreinscriptionRequest data)
         {
-            var bachelier = _context.Bacheliers.Where(b => b.NumeroCandidat == data.Num_bacc.ToString() && b.Annee.Year.ToString() == data.Annee_bacc).ToList();
+            var bachelier = _context.Bacheliers.Where(b => b.NumeroCandidat == data.Num_bacc.ToString() && b.Annee.Year.ToString() == data.Annee_bacc.ToString()).ToList();
             if (bachelier == null || bachelier.Count == 0)
             {
                 return NotFound("Bachelier not found");
