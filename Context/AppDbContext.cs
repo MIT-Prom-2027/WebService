@@ -1,174 +1,152 @@
-﻿using System;
-using System.Collections.Generic;
+// using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using UnivManager.Models;
+using OutilAdmin.Models;
 
 namespace UnivManager.Context
 {
-    public partial class AppDbContext : DbContext
+    public class AppDbContext : DbContext
     {
-        // Constructeur prenant les options de configuration du contexte
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
 
-        // Définition des tables (DbSet) correspondant aux entités du modèle
-        public virtual DbSet<administration> administrations { get; set; }
-        public virtual DbSet<bachelier> bacheliers { get; set; }
-        public virtual DbSet<centre> centres { get; set; }
-        public virtual DbSet<etablissement> etablissements { get; set; }
-        public virtual DbSet<historique> historiques { get; set; }
-        public virtual DbSet<matiere> matieres { get; set; }
-        public virtual DbSet<mention> mentions { get; set; }
-        public virtual DbSet<note> notes { get; set; }
-        public virtual DbSet<option> options { get; set; }
-        public virtual DbSet<personne> personnes { get; set; }
-        public virtual DbSet<province> provinces { get; set; }
+        // Vos entités métiers
+        public virtual DbSet<Administration> Administrations { get; set; }
+        public virtual DbSet<Bachelier> Bacheliers { get; set; }
+        public virtual DbSet<Centre> Centres { get; set; }
+        public virtual DbSet<Etablissement> Etablissements { get; set; }
+        public virtual DbSet<Historique> Historiques { get; set; }
+        public virtual DbSet<Matiere> Matieres { get; set; }
+        public virtual DbSet<Mention> Mentions { get; set; }
+        public virtual DbSet<Note> Notes { get; set; }
+        public virtual DbSet<Option> Options { get; set; }
+        public virtual DbSet<Personne> Personnes { get; set; }
+        public virtual DbSet<Province> Provinces { get; set; }
 
-        // Méthode de configuration du modèle (appelée lors de la création du modèle)
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Déclaration d'un type énuméré PostgreSQL pour le sexe
-            modelBuilder.HasPostgresEnum("sexe_type", new[] { "F", "M" });
+            base.OnModelCreating(modelBuilder); // Indispensable pour Identity
 
-            // Configuration de l'entité administration
-            modelBuilder.Entity<administration>(entity =>
+            // Configuration simplifiée - laissez EF gérer la plupart des conventions
+            
+            // Seulement les configurations personnalisées nécessaires
+            modelBuilder.Entity<Bachelier>(entity =>
             {
-                entity.HasKey(e => e.id_admin).HasName("administration_pkey");
-                entity.ToTable("administration");
-                entity.HasIndex(e => e.username, "administration_username_key").IsUnique(); // Username unique
+                entity.HasKey(e => e.IdBachelier);
+                entity.Property(e => e.NumeroCandidat).IsRequired();
+                entity.Property(e => e.Moyenne).HasColumnType("decimal(18,2)");
+                
+                // Relations
+                entity.HasOne(d => d.IdPersonneNavigation)
+                    .WithMany(p => p.Bacheliers)
+                    .HasForeignKey(d => d.IdPersonne);
+                    
+                entity.HasOne(d => d.IdCentreNavigation)
+                    .WithMany(p => p.Bacheliers)
+                    .HasForeignKey(d => d.IdCentre);
+                    
+                entity.HasOne(d => d.IdEtablissementNavigation)
+                    .WithMany(p => p.Bacheliers)
+                    .HasForeignKey(d => d.IdEtablissement);
+                    
+                entity.HasOne(d => d.IdMentionNavigation)
+                    .WithMany(p => p.Bacheliers)
+                    .HasForeignKey(d => d.IdMention);
+                    
+                entity.HasOne(d => d.IdOptionNavigation)
+                    .WithMany(p => p.Bacheliers)
+                    .HasForeignKey(d => d.IdOption);
             });
 
-        // Configuration de l'entité bachelier et de ses relations
-        modelBuilder.Entity<bachelier>(entity =>
-        {
-            entity.HasKey(e => e.id_bachelier).HasName("pk_bacheliers");
-            entity.Property(e => e.id_bachelier).HasDefaultValueSql("nextval('bacheliers_id_bachelier_seq'::regclass)");
-            // Relations avec centre, établissement, mention, option, personne
-            entity.HasOne(d => d.id_centreNavigation).WithMany(p => p.bacheliers)
-                .HasForeignKey(d => d.id_centre)
-                .HasConstraintName("bacheliers_centre_fkey");
-            entity.HasOne(d => d.id_etablissementNavigation).WithMany(p => p.bacheliers)
-                .HasForeignKey(d => d.id_etablissement)
-                .HasConstraintName("bacheliers_etablissement_fkey");
-            entity.HasOne(d => d.id_mentionNavigation).WithMany(p => p.bacheliers)
-                .HasForeignKey(d => d.id_mention)
-                .HasConstraintName("bacheliers_mention_fkey");
-            entity.HasOne(d => d.id_optionNavigation).WithMany(p => p.bacheliers)
-                .HasForeignKey(d => d.id_option)
-                .HasConstraintName("bacheliers_serie_fkey");
-            entity.HasOne(d => d.id_personneNavigation).WithMany(p => p.bacheliers)
-                .HasForeignKey(d => d.id_personne)
-                .HasConstraintName("bacheliers_id_personne_fkey");
-        });
-
-        // Configuration de l'entité centre et de sa relation avec province
-        modelBuilder.Entity<centre>(entity =>
-        {
-            entity.HasKey(e => e.id_centre).HasName("centres_pkey");
-            entity.Property(e => e.id_centre).HasDefaultValueSql("nextval('centres_id_centre_seq'::regclass)");
-            entity.HasOne(d => d.id_provinceNavigation).WithMany(p => p.centres)
-                .HasForeignKey(d => d.id_province)
-                .HasConstraintName("fk_centres_provinces");
-        });
-
-        // Configuration de l'entité etablissement
-        modelBuilder.Entity<etablissement>(entity =>
-        {
-            entity.HasKey(e => e.id_etablissement).HasName("etablissements_pkey");
-            entity.Property(e => e.id_etablissement).HasDefaultValueSql("nextval('etablissements_id_etablissement_seq'::regclass)");
-        });
-
-            // Configuration de l'entité historique et de ses relations
-            modelBuilder.Entity<historique>(entity =>
+            modelBuilder.Entity<Centre>(entity =>
             {
-                entity.HasKey(e => e.id_historique).HasName("historique_pkey");
-                entity.ToTable("historique");
-                entity.Property(e => e.date_evenement)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnType("timestamp without time zone");
-                entity.Property(e => e.id_province).ValueGeneratedOnAdd();
-                entity.HasOne(d => d.admin).WithMany(p => p.historiques)
-                    .HasForeignKey(d => d.admin_id)
-                    .HasConstraintName("historique_admin_id_fkey");
-                entity.HasOne(d => d.id_provinceNavigation).WithMany(p => p.historiques)
-                    .HasForeignKey(d => d.id_province)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_historique_provinces");
+                entity.HasKey(e => e.IdCentre);
+                entity.Property(e => e.NomCentre).IsRequired().HasMaxLength(200);
+                
+                entity.HasOne(d => d.IdProvinceNavigation)
+                    .WithMany(p => p.Centres)
+                    .HasForeignKey(d => d.IdProvince);
             });
 
-        // Configuration de l'entité matiere
-        modelBuilder.Entity<matiere>(entity =>
-        {
-            entity.HasKey(e => e.id_matiere).HasName("matieres_pkey");
-            entity.Property(e => e.id_matiere).HasDefaultValueSql("nextval('matieres_id_matiere_seq'::regclass)");
-        });
-
-        // Configuration de l'entité mention
-        modelBuilder.Entity<mention>(entity =>
-        {
-            entity.HasKey(e => e.id_mention).HasName("mentions_pkey");
-            entity.Property(e => e.id_mention).HasDefaultValueSql("nextval('mentions_id_mention_seq'::regclass)");
-            entity.Property(e => e.max).HasDefaultValue(20); // Valeur max par défaut
-            entity.Property(e => e.min).HasDefaultValue(0);  // Valeur min par défaut
-        });
-
-        // Configuration de l'entité note et de ses relations
-        modelBuilder.Entity<note>(entity =>
-        {
-            entity.HasKey(e => e.id_note).HasName("notes_pkey");
-            entity.Property(e => e.id_note).HasDefaultValueSql("nextval('notes_id_note_seq'::regclass)");
-            entity.Property(e => e.est_optionnel).HasDefaultValue(false); // Par défaut, la note n'est pas optionnelle
-            entity.HasOne(d => d.id_bachelierNavigation).WithMany(p => p.notes)
-                .HasForeignKey(d => d.id_bachelier)
-                .HasConstraintName("notes_id_bachelier_fkey");
-            entity.HasOne(d => d.id_matiereNavigation).WithMany(p => p.notes)
-                .HasForeignKey(d => d.id_matiere)
-                .HasConstraintName("notes_id_matiere_fkey");
-        });
-
-            // Configuration de l'entité option
-            modelBuilder.Entity<option>(entity =>
+            modelBuilder.Entity<Etablissement>(entity =>
             {
-                entity.HasKey(e => e.id_option).HasName("options_pkey");
-                entity.Property(e => e.id_option).HasDefaultValueSql("nextval('options_id_optioin_seq'::regclass)");
+                entity.HasKey(e => e.IdEtablissement);
+                entity.Property(e => e.NomEtablissement).IsRequired().HasMaxLength(200);
             });
 
-        // Configuration de l'entité personne
-        modelBuilder.Entity<personne>(entity =>
-        {
-            entity.HasKey(e => e.id_personne).HasName("personnes_pkey");
-            entity.Property(e => e.id_personne).HasDefaultValueSql("nextval('personnes_id_personne_seq'::regclass)");
-        });
+            modelBuilder.Entity<Mention>(entity =>
+            {
+                entity.HasKey(e => e.IdMention);
+                entity.Property(e => e.NomMention).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Min).HasDefaultValue(0);
+                entity.Property(e => e.Max).HasDefaultValue(20);
+            });
 
-        // Configuration de l'entité province
-        modelBuilder.Entity<province>(entity =>
-        {
-            entity.HasKey(e => e.id_province).HasName("provinces_pkey");
-            entity.Property(e => e.id_province).HasDefaultValueSql("nextval('provinces_id_province_seq'::regclass)");
-        });
+            modelBuilder.Entity<Option>(entity =>
+            {
+                entity.HasKey(e => e.IdOption);
+                entity.Property(e => e.Serie).IsRequired().HasMaxLength(50);
+            });
 
-            // Déclaration des séquences utilisées pour les clés primaires
-            modelBuilder.HasSequence<int>("administration_id_seq");
-            modelBuilder.HasSequence<int>("bacheliers_id_bachelier_seq");
-            modelBuilder.HasSequence<int>("centres_id_centre_seq");
-            modelBuilder.HasSequence<int>("etablissements_id_etablissement_seq");
-            modelBuilder.HasSequence<int>("historique_id_seq");
-            modelBuilder.HasSequence<int>("matieres_id_matiere_seq");
-            modelBuilder.HasSequence<int>("mentions_id_mention_seq");
-            modelBuilder.HasSequence<int>("notes_id_note_seq");
-            modelBuilder.HasSequence<int>("options_id_optioin_seq");
-            modelBuilder.HasSequence<int>("personnes_id_personne_seq");
-            modelBuilder.HasSequence<int>("provinces_id_province_seq");
+            modelBuilder.Entity<Personne>(entity =>
+            {
+                entity.HasKey(e => e.IdPersonne);
+                entity.Property(e => e.NomPrenom).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.LieuNaissance).HasMaxLength(200);
+                entity.Property(p => p.Sexe)
+                  .HasMaxLength(1)
+                  .IsRequired()
+                  .HasDefaultValue("M");
+            });
 
-            // Appel d'une méthode partielle pour permettre une extension de la configuration
-            OnModelCreatingPartial(modelBuilder);
+            modelBuilder.Entity<Province>(entity =>
+            {
+                entity.HasKey(e => e.IdProvince);
+                entity.Property(e => e.NomProvince).IsRequired().HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<Note>(entity =>
+            {
+                entity.HasKey(e => e.IdNote);
+                entity.Property(e => e.ValeurNote).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.EstOptionnel).HasDefaultValue(false);
+                
+                entity.HasOne(d => d.IdBachelierNavigation)
+                    .WithMany(p => p.Notes)
+                    .HasForeignKey(d => d.IdBachelier);
+                    
+                entity.HasOne(d => d.IdMatiereNavigation)
+                    .WithMany(p => p.Notes)
+                    .HasForeignKey(d => d.IdMatiere);
+            });
+
+            modelBuilder.Entity<Matiere>(entity =>
+            {
+                entity.HasKey(e => e.IdMatiere);
+                entity.Property(e => e.NomMatiere).IsRequired().HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<Administration>(entity =>
+            {
+                entity.HasKey(e => e.IdAdmin);
+                entity.Property(e => e.Username).IsRequired().HasMaxLength(100);
+                entity.HasIndex(e => e.Username).IsUnique();
+            });
+
+            modelBuilder.Entity<Historique>(entity =>
+            {
+                entity.HasKey(e => e.IdHistorique);
+                entity.Property(e => e.DateEvenement).HasDefaultValueSql("NOW()");
+                
+                entity.HasOne(d => d.Admin)
+                    .WithMany(p => p.Historiques)
+                    .HasForeignKey(d => d.AdminId);
+                    
+                entity.HasOne(d => d.IdProvinceNavigation)
+                    .WithMany(p => p.Historiques)
+                    .HasForeignKey(d => d.IdProvince);
+            });
         }
-
-        // Méthode partielle pour permettre une extension de la configuration dans un autre fichier
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
-
-// Classe de contexte de base de données pour Entity Framework Core

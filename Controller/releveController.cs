@@ -17,40 +17,40 @@ namespace UnivManager.Controllers
         [HttpPost("getDataByNumBacc")]
         public ActionResult<ReleveResponse> Post([FromBody] ReleveRequest data)
         {
-            if (data == null || data.Num_bacc == 0 || data.Annee == 0)
+            if (data == null || data.Num_bacc == 0 || data.Annee_bacc == 0)
             {
                 return BadRequest("Données de requête invalides.");
             }
 
-            var bachelier = _context.bacheliers.Where(b => b.numero_candidat == data.Num_bacc.ToString()).ToList();
+            var bachelier = _context.Bacheliers.Where(b => b.NumeroCandidat == data.Num_bacc.ToString() &&  b.Annee.Year.ToString() == data.Annee_bacc.ToString()).ToList();
             if (bachelier == null || bachelier.Count == 0)
             {
                 return NotFound("Bachelier not found");
             }
-            var personnes = _context.personnes.Where(p => p.id_personne == bachelier[0].id_personne).ToList();
+            var personnes = _context.Personnes.Where(p => p.IdPersonne == bachelier[0].IdPersonne).ToList();
             if (personnes == null || personnes.Count == 0)
             {
                 return NotFound("Person not found");
             }
 
             // Récupération des notes
-            var notes = _context.notes.Where(n => n.id_bachelier == bachelier[0].id_bachelier).ToList();
+            var notes = _context.Notes.Where(n => n.IdBachelier == bachelier[0].IdBachelier).ToList();
             var noteDetails = new List<NoteDetail>();
             double totalNotes = 0;
             double totalCoefficients = 0;
 
             foreach (var note in notes)
             {
-                var matiere = _context.matieres.Where(m => m.id_matiere == note.id_matiere).FirstOrDefault();
+                var matiere = _context.Matieres.Where(m => m.IdMatiere == note.IdMatiere).FirstOrDefault();
                 double coefficient = 1.0; // Coefficient par défaut
                 
                 var noteDetail = new NoteDetail
                 {
-                    Matiere = matiere?.nom_matiere,
-                    Note = note.valeur_note,
+                    Matiere = matiere?.NomMatiere,
+                    Note = note.ValeurNote,
                     Coefficient = coefficient,
-                    Est_optionnel = note.est_optionnel ?? false,
-                    Note_ponderee = note.valeur_note * coefficient
+                    Est_optionnel = note.EstOptionnel ?? false,
+                    Note_ponderee = note.ValeurNote * coefficient
                 };
 
                 noteDetails.Add(noteDetail);
@@ -59,27 +59,27 @@ namespace UnivManager.Controllers
             }
 
             // Récupération des informations supplémentaires
-            var centre = _context.centres.Where(c => c.id_centre == bachelier[0].id_centre).FirstOrDefault();
-            var option = _context.options.Where(o => o.id_option == bachelier[0].id_option).FirstOrDefault();
-            var mention = _context.mentions.Where(m => m.id_mention == bachelier[0].id_mention).FirstOrDefault();
+            var centre = _context.Centres.Where(c => c.IdCentre == bachelier[0].IdCentre).FirstOrDefault();
+            var option = _context.Options.Where(o => o.IdOption == bachelier[0].IdOption).FirstOrDefault();
+            var mention = _context.Mentions.Where(m => m.IdMention == bachelier[0].IdMention).FirstOrDefault();
 
             double moyenne = totalCoefficients > 0 ? totalNotes / totalCoefficients : 0;
 
             return Ok(new ReleveResponse
             {
-                Nom_prenom = personnes[0].nom_prenom,
-                Date_naissance = personnes[0].date_naissance.ToDateTime(new TimeOnly(0, 0)),
-                Lieu_naissance = personnes[0].lieu_naissance,
-                Annee = bachelier[0].annee.Year,
+                Nom_prenom = personnes[0].NomPrenom,
+                Date_naissance = personnes[0].DateNaissance.ToDateTime(new TimeOnly(0, 0)),
+                Lieu_naissance = personnes[0].LieuNaissance,
+                Annee = bachelier[0].Annee.Year,
                 Num_bacc = data.Num_bacc.ToString(),
-                Serie_bacc = option?.serie,
-                Centre_bacc = centre?.nom_centre,
+                Serie_bacc = option?.Serie,
+                Centre_bacc = centre?.NomCentre,
                 Notes = noteDetails,
                 Total_notes = totalNotes,
                 Total_coefficients = totalCoefficients,
                 Moyenne_bacc = moyenne,
                 Est_admis = moyenne >= 10.0,
-                Mention = mention?.nom_mention
+                Mention = mention?.NomMention
             });
         }
     }

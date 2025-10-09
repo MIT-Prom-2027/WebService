@@ -30,12 +30,12 @@ namespace UnivManager.Controllers
                 return BadRequest("Format de l'année invalide.");
             }
 
-            var bachelier = _context.bacheliers
-                .Include(b => b.id_personneNavigation)
-                .Include(b => b.id_mentionNavigation)
+            var bachelier = _context.Bacheliers
+                .Include(b => b.IdPersonneNavigation)
+                .Include(b => b.IdMentionNavigation)
                 .FirstOrDefault(b =>
-                    b.numero_candidat == request.NumeroBacc &&
-                    b.annee.Year == anneeInt);
+                    b.NumeroCandidat == request.NumeroBacc &&
+                    b.Annee.Year == anneeInt);
 
             if (bachelier == null)
             {
@@ -44,10 +44,10 @@ namespace UnivManager.Controllers
 
             var response = new AttestationResponse
             {
-                NomPrenom = bachelier.id_personneNavigation?.nom_prenom,
-                DateNaissance = bachelier.id_personneNavigation?.date_naissance.ToString("yyyy-MM-dd"),
-                Mention = bachelier.id_mentionNavigation?.nom_mention,
-                AnneeBacc = bachelier.annee.Year.ToString()
+                NomPrenom = bachelier.IdPersonneNavigation?.NomPrenom,
+                DateNaissance = bachelier.IdPersonneNavigation?.DateNaissance.ToString("yyyy-MM-dd"),
+                Mention = bachelier.IdMentionNavigation?.NomMention,
+                AnneeBacc = bachelier.Annee.Year.ToString()
             };
 
             return Ok(response);

@@ -1,0 +1,53 @@
+# This workflow will build, test, and deploy a .NET project to a VPS
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Récupérer le code source
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Installer .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'  # adapte selon ta version .NET
+
+      # 3️⃣ Restaurer les dépendances
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # 4️⃣ Build du projet
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      # 5️⃣ Tests unitaires
+      - name: Run tests
+        run: dotnet test --no-build --verbosity normal
+
+      # 6️⃣ Publier le projet dans un dossier temporaire
+      - name: Publish project
+        run: dotnet publish UnivManager.csproj -c Release -o ./WebService
+
+      # 7️⃣ Déploiement sur le serveur VPS via SCP
+      - name: Deploy via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "./WebService/*"
+          target: "/home/servsciences/"
+          debug: true
