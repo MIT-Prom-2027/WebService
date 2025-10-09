@@ -25,6 +25,13 @@ namespace UnivManager.Controllers
             {
                 return NotFound("Person not found");
             }
+            // var noteBacc = _context.notes.Where(n=>n.id_bachelier == bachelier.id_bachelier);
+            // var[] notes;
+            // foreach (var item in noteBacc)
+            // {
+            //     var matiere = _context.matiere.Where(m=>m.id_matiere == item.id_matiere);
+
+            // }
             return Ok(new PreinscriptionResponse
             {
                 Nom_prenom = personnes[0].nom_prenom,

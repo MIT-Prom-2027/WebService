@@ -1,5 +1,9 @@
 namespace UnivManager.Dtos
 {
+    // class Note {
+    //     string matiere {get;set;}
+    //     string value {get;set;}
+    // }
     public class PreinscriptionResponse
     {
         public string? Nom_prenom { get; set; }
@@ -9,6 +13,7 @@ namespace UnivManager.Dtos
         public string? Mention { get; set; }
         public string? Option { get; set; }
         public string? Num_bacc { get; set; }
+        // public List<Note> Note {get;set;}
 
     }
 }
