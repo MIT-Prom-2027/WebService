@@ -49,5 +49,5 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           source: "./WebService/*"
-          target: "/home/servsciences/"
+          target: "/home/sciadm/"
           debug: true
