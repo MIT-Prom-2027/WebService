@@ -51,3 +51,16 @@ jobs:
           source: "./WebService/*"
           target: "/home/sciadm/"
           debug: true
+          
+       # 8️⃣ Redémarrer le service sur le VPS
+      - name: Restart service on VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_SUPER_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            echo "🚀 Restarting systemd service..."
+            sudo systemctl restart webservice.service
+            sudo systemctl status webservice.service --no-pager
